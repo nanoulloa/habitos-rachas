@@ -1,0 +1,483 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bitácora de hábitos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Mono:wght@400;500&family=Karla:wght@400;500;700&display=swap">
+
+<style>
+  :root{
+    --fondo:#131319;
+    --panel:#1A1A22;
+    --panel-alto:#23232D;
+    --linea:#2C2C38;
+    --texto:#ECEAE4;
+    --suave:#9A96A6;
+    --tenue:#6C6878;
+    --acento:#E9A13C;
+    --acento-claro:#F5C87F;
+    --acento-halo:rgba(233,161,60,.22);
+    --sobre-acento:#1B1206;
+    --peligro:#DB7A6E;
+    --serif:"Fraunces",Georgia,"Times New Roman",serif;
+    --sans:"Karla",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+
+  html{color-scheme:dark}
+  *,*::before,*::after{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--fondo);
+    background-image:radial-gradient(120% 60% at 50% -20%,rgba(233,161,60,.07),transparent 60%);
+    background-attachment:fixed;
+    color:var(--texto);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  :focus-visible{outline:2px solid var(--acento);outline-offset:3px;border-radius:4px}
+
+  .envoltura{max-width:44rem;margin:0 auto;padding:clamp(1.75rem,5vw,3.25rem) clamp(1rem,4vw,2rem) 4rem}
+
+  /* --- Cabecera --- */
+  .cabecera{display:flex;align-items:flex-end;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+  .fecha{font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--suave);margin:0}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,5.5vw,2.6rem);line-height:1.05;letter-spacing:-.015em;margin:.5rem 0 0;text-wrap:balance}
+  .resumen{text-align:right;flex:0 0 auto}
+  .resumen .cifra{font-family:var(--serif);font-weight:600;font-size:1.9rem;line-height:1;font-variant-numeric:tabular-nums;display:block}
+  .resumen .pie{font-family:var(--mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--suave);display:block;margin-top:.4rem}
+  .barra{height:3px;background:var(--linea);border-radius:99px;margin-top:1.4rem;overflow:hidden}
+  .barra i{display:block;height:100%;background:var(--acento);border-radius:99px;transition:width .4s cubic-bezier(.2,.7,.3,1)}
+
+  .historico{
+    display:flex;align-items:baseline;gap:.55rem;flex-wrap:wrap;
+    margin:.85rem 0 0;padding:0;
+  }
+  .historico .etq{font-family:var(--mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--tenue)}
+  .historico .val{font-family:var(--serif);font-weight:600;font-size:1.05rem;color:var(--acento-claro);font-variant-numeric:tabular-nums}
+  .historico .quien{font-size:.85rem;color:var(--suave);overflow-wrap:anywhere}
+
+  /* --- Alta de hábito --- */
+  .forma{display:flex;gap:.55rem;margin-top:1.75rem}
+  .forma input{
+    flex:1;min-width:0;font:inherit;color:var(--texto);
+    background:var(--panel);border:1px solid var(--linea);border-radius:9px;padding:.7rem .9rem;
+    transition:border-color .18s ease,background .18s ease;
+  }
+  .forma input::placeholder{color:var(--tenue)}
+  .forma input:focus{border-color:var(--acento);background:var(--panel-alto);outline:none}
+  .forma button{
+    font:inherit;font-weight:700;cursor:pointer;white-space:nowrap;
+    background:var(--acento);color:var(--sobre-acento);border:0;border-radius:9px;padding:.7rem 1.15rem;
+    transition:filter .18s ease;
+  }
+  .forma button:hover{filter:brightness(1.08)}
+
+  /* --- Aviso de ejemplo --- */
+  .aviso{
+    display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;
+    margin-top:1.1rem;padding:.65rem .5rem .65rem .9rem;
+    border:1px dashed var(--linea);border-radius:10px;
+    font-size:.85rem;color:var(--suave);
+  }
+  .aviso button{font:inherit;font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;
+    background:none;border:1px solid var(--linea);border-radius:7px;color:var(--texto);padding:.4rem .7rem;cursor:pointer}
+  .aviso button:hover{border-color:var(--acento);color:var(--acento-claro)}
+
+  /* --- Lista --- */
+  .lista{list-style:none;margin:1.5rem 0 0;padding:0}
+  .habito{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;
+    column-gap:1rem;row-gap:.9rem;
+    padding:1.05rem .15rem;border-top:1px solid var(--linea);
+  }
+  .lista li:last-child{border-bottom:1px solid var(--linea)}
+
+  .marca{
+    width:2.6rem;height:2.6rem;border-radius:50%;cursor:pointer;
+    display:grid;place-items:center;
+    background:var(--panel);border:1.5px solid var(--linea);
+    transition:background .18s ease,border-color .18s ease,transform .12s ease;
+  }
+  .marca svg{width:1.15rem;height:1.15rem;fill:none;stroke:#3E3E4B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s ease}
+  .marca:hover{border-color:var(--tenue)}
+  .marca:active{transform:scale(.94)}
+  .marca[aria-pressed="true"]{background:var(--acento);border-color:var(--acento)}
+  .marca[aria-pressed="true"] svg{stroke:var(--sobre-acento)}
+
+  .nombre{display:block;font-size:1.02rem;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+  .metricas{
+    display:flex;flex-wrap:wrap;align-items:baseline;column-gap:1rem;row-gap:.15rem;
+    margin-top:.3rem;font-family:var(--mono);font-size:.71rem;color:var(--suave);font-variant-numeric:tabular-nums;
+  }
+  .metricas b{font-weight:500;color:var(--acento-claro)}
+  .metricas .m{white-space:nowrap}
+  .metricas .mejor{color:var(--texto)}
+  .metricas .cima{color:var(--acento-claro);text-transform:uppercase;letter-spacing:.08em;font-size:.66rem}
+
+  /* --- Semana --- */
+  .semana{display:flex;gap:.3rem}
+  .dia{display:flex;flex-direction:column;align-items:center;gap:.32rem;width:1.95rem;padding:0;border:0;background:none;cursor:pointer}
+  .dia .ini{font-family:var(--mono);font-size:.6rem;letter-spacing:.05em;color:var(--tenue);text-transform:uppercase}
+  .dia .punto{
+    width:1.5rem;height:1.5rem;border-radius:7px;
+    background:var(--panel);border:1px solid var(--linea);
+    transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+  }
+  .dia:hover .punto{border-color:var(--tenue)}
+  .dia.hecho .punto{background:var(--acento);border-color:var(--acento)}
+  .dia.hoy .ini{color:var(--acento-claro)}
+  .dia.hoy .punto{box-shadow:0 0 0 3px var(--acento-halo)}
+  .dia.futuro{cursor:default}
+  .dia.futuro .punto{background:transparent;border-style:dashed;opacity:.45}
+  .dia.futuro:hover .punto{border-color:var(--linea)}
+
+  /* --- Eliminar --- */
+  .borrar{
+    width:1.9rem;height:1.9rem;border-radius:7px;cursor:pointer;
+    background:none;border:1px solid transparent;color:var(--tenue);
+    font-size:1.15rem;line-height:1;display:grid;place-items:center;
+    transition:color .18s ease,border-color .18s ease;
+  }
+  .borrar:hover{color:var(--peligro);border-color:var(--linea)}
+  .confirma{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.35rem;font-size:.82rem;color:var(--suave)}
+  .confirma button{font:inherit;font-family:var(--mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
+    border-radius:6px;padding:.3rem .6rem;cursor:pointer;background:none;border:1px solid var(--linea);color:var(--texto)}
+  .confirma .si{border-color:var(--peligro);color:var(--peligro)}
+  .confirma .si:hover{background:rgba(219,122,110,.12)}
+  .confirma .no:hover{border-color:var(--tenue)}
+
+  /* --- Vacío y pie --- */
+  .vacio{border-top:1px solid var(--linea);padding:2.75rem 0;text-align:center;color:var(--suave)}
+  .vacio strong{display:block;font-family:var(--serif);font-weight:600;font-size:1.15rem;color:var(--texto);margin-bottom:.4rem}
+  .vacio span{display:block;font-size:.9rem}
+  .pie-nota{margin-top:2.25rem;font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;color:var(--tenue);text-align:center}
+
+  @media (max-width:640px){
+    .habito{grid-template-columns:auto minmax(0,1fr) auto;column-gap:.85rem}
+    .marca{grid-column:1;grid-row:1}
+    .datos{grid-column:2;grid-row:1}
+    .borrar{grid-column:3;grid-row:1}
+    .semana{grid-column:1 / -1;grid-row:2;justify-content:space-between;gap:.25rem}
+    .resumen{text-align:left}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important}
+  }
+</style>
+
+<main class="envoltura">
+  <header>
+    <div class="cabecera">
+      <div>
+        <p class="fecha" id="fecha-hoy"></p>
+        <h1>Bitácora de hábitos</h1>
+      </div>
+      <div class="resumen">
+        <span class="cifra" id="cifra">0/0</span>
+        <span class="pie">completados hoy</span>
+      </div>
+    </div>
+    <div class="barra" role="presentation"><i id="barra" style="width:0%"></i></div>
+    <p class="historico" id="historico" hidden></p>
+  </header>
+
+  <form class="forma" id="forma" autocomplete="off">
+    <input id="nuevo" name="nuevo" type="text" maxlength="60" placeholder="Nuevo hábito: leer 20 minutos, salir a caminar…" aria-label="Nombre del hábito nuevo">
+    <button type="submit">Agregar</button>
+  </form>
+
+  <div id="aviso-zona"></div>
+
+  <ul class="lista" id="lista"></ul>
+
+  <p class="pie-nota">Los datos se guardan en este navegador.</p>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  var CLAVE = "habitos.v1";
+  var MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  var DIAS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+  var INICIALES = ["Lu","Ma","Mi","Ju","Vi","Sá","Do"];
+
+  /* --- Fechas locales (nunca UTC: el día se corta a medianoche del usuario) --- */
+  function iso(f){
+    return f.getFullYear() + "-" + String(f.getMonth()+1).padStart(2,"0") + "-" + String(f.getDate()).padStart(2,"0");
+  }
+  function aFecha(s){ var p = s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); }
+  function sumar(s, n){ var f = aFecha(s); f.setDate(f.getDate()+n); return iso(f); }
+  function enPalabras(s){ var f = aFecha(s); return DIAS[f.getDay()] + " " + f.getDate() + " de " + MESES[f.getMonth()]; }
+
+  var HOY = iso(new Date());
+  var LUNES = (function(){ var f = new Date(); f.setDate(f.getDate() - ((f.getDay()+6)%7)); return iso(f); })();
+
+  /* --- Cálculos --- */
+  function racha(set){
+    var cursor = set[HOY] ? HOY : sumar(HOY,-1);
+    var n = 0;
+    while(set[cursor]){ n++; cursor = sumar(cursor,-1); }
+    return n;
+  }
+  function record(dias){
+    var orden = dias.slice().sort(), mejor = 0, actual = 0, previo = null;
+    for(var i=0;i<orden.length;i++){
+      actual = (previo && sumar(previo,1) === orden[i]) ? actual+1 : 1;
+      previo = orden[i];
+      if(actual > mejor) mejor = actual;
+    }
+    return mejor;
+  }
+  function porcentaje30(set){
+    var n = 0;
+    for(var i=0;i<30;i++){ if(set[sumar(HOY,-i)]) n++; }
+    return Math.round(n/30*100);
+  }
+  function indice(dias){
+    var set = {};
+    for(var i=0;i<dias.length;i++) set[dias[i]] = true;
+    return set;
+  }
+
+  /* --- Estado --- */
+  var habitos = [];
+  var confirmando = null;
+
+  function guardar(){
+    try{ localStorage.setItem(CLAVE, JSON.stringify(habitos)); }catch(e){}
+  }
+  function cargar(){
+    try{
+      var crudo = localStorage.getItem(CLAVE);
+      if(crudo){
+        var datos = JSON.parse(crudo);
+        if(Array.isArray(datos)) return datos;
+      }
+    }catch(e){}
+    return null;
+  }
+  function ejemplos(){
+    function dias(lista){ return lista.map(function(n){ return sumar(HOY,-n); }); }
+    return [
+      { id:"ej1", nombre:"Leer 20 minutos", ejemplo:true, dias:dias([0,1,2,3,4,5,8,9,10,12,13,17,20,21]) },
+      { id:"ej2", nombre:"Caminar 30 minutos", ejemplo:true, dias:dias([1,2,3,6,7,8,9,14,15,16]) },
+      { id:"ej3", nombre:"Meditar 10 minutos", ejemplo:true, dias:dias([0,1,2,3,4,5,6,7,8,9,10,11,15,16,17,18,25]) }
+    ];
+  }
+
+  /* --- Pintado --- */
+  var $lista = document.getElementById("lista");
+  var $avisoZona = document.getElementById("aviso-zona");
+  var $cifra = document.getElementById("cifra");
+  var $barra = document.getElementById("barra");
+  document.getElementById("fecha-hoy").textContent = enPalabras(HOY);
+
+  function nodo(etiqueta, clase, texto){
+    var el = document.createElement(etiqueta);
+    if(clase) el.className = clase;
+    if(texto != null) el.textContent = texto;
+    return el;
+  }
+
+  function pintarSemana(h, set){
+    var semana = nodo("div","semana");
+    semana.setAttribute("role","group");
+    semana.setAttribute("aria-label","Semana en curso de " + h.nombre);
+    for(var i=0;i<7;i++){
+      var fecha = sumar(LUNES,i);
+      var futuro = fecha > HOY;
+      var hecho = !!set[fecha];
+      var cel = nodo("button","dia" + (hecho ? " hecho" : "") + (fecha === HOY ? " hoy" : "") + (futuro ? " futuro" : ""));
+      cel.type = "button";
+      cel.appendChild(nodo("span","ini",INICIALES[i]));
+      cel.appendChild(nodo("span","punto"));
+      cel.setAttribute("aria-label", enPalabras(fecha) + ": " + (futuro ? "aún no llega" : (hecho ? "completado" : "sin completar")));
+      if(futuro){
+        cel.disabled = true;
+      }else{
+        cel.setAttribute("aria-pressed", hecho ? "true" : "false");
+        cel.dataset.k = "dia:" + h.id + ":" + fecha;
+        cel.dataset.accion = "alternar";
+        cel.dataset.id = h.id;
+        cel.dataset.fecha = fecha;
+      }
+      semana.appendChild(cel);
+    }
+    return semana;
+  }
+
+  function pintarHabito(h){
+    var set = indice(h.dias);
+    var hoyHecho = !!set[HOY];
+    var li = nodo("li","habito");
+
+    var marca = nodo("button","marca");
+    marca.type = "button";
+    marca.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.6l4.6 4.6L19.5 6.8"/></svg>';
+    marca.setAttribute("aria-pressed", hoyHecho ? "true" : "false");
+    marca.setAttribute("aria-label", (hoyHecho ? "Desmarcar" : "Marcar") + " " + h.nombre + " como completado hoy");
+    marca.dataset.k = "marca:" + h.id;
+    marca.dataset.accion = "alternar";
+    marca.dataset.id = h.id;
+    marca.dataset.fecha = HOY;
+    li.appendChild(marca);
+
+    var datos = nodo("div","datos");
+    datos.appendChild(nodo("span","nombre",h.nombre));
+
+    if(confirmando === h.id){
+      var conf = nodo("div","confirma");
+      conf.appendChild(nodo("span",null,"¿Eliminar este hábito y su historial?"));
+      var si = nodo("button","si","Eliminar");
+      si.type = "button"; si.dataset.accion = "eliminar"; si.dataset.id = h.id; si.dataset.k = "si:" + h.id;
+      var no = nodo("button","no","Cancelar");
+      no.type = "button"; no.dataset.accion = "cancelar"; no.dataset.k = "no:" + h.id;
+      conf.appendChild(si); conf.appendChild(no);
+      datos.appendChild(conf);
+    }else{
+      var m = nodo("span","metricas");
+      var r = racha(set);
+      var mejor = record(h.dias);
+      var enRecord = r > 0 && r === mejor;
+      m.innerHTML = '<span class="m">Racha <b>' + r + (r === 1 ? " día" : " días") + '</b></span>' +
+        '<span class="m">Mejor racha <b class="mejor">' + mejor + (mejor === 1 ? " día" : " días") + '</b>' +
+        (enRecord ? ' <span class="cima">récord</span>' : '') + '</span>' +
+        '<span class="m">' + porcentaje30(set) + '% en 30 días</span>';
+      datos.appendChild(m);
+    }
+    li.appendChild(datos);
+
+    li.appendChild(pintarSemana(h, set));
+
+    var x = nodo("button","borrar","×");
+    x.type = "button";
+    x.setAttribute("aria-label","Eliminar " + h.nombre);
+    x.dataset.accion = "confirmar"; x.dataset.id = h.id; x.dataset.k = "x:" + h.id;
+    li.appendChild(x);
+
+    return li;
+  }
+
+  function pintar(){
+    var enfocado = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.k : null;
+
+    $lista.textContent = "";
+    if(habitos.length === 0){
+      var vacio = nodo("li","vacio");
+      vacio.appendChild(nodo("strong",null,"Todavía no hay hábitos"));
+      vacio.appendChild(nodo("span",null,"El campo de arriba crea el primero. Después basta un clic por día."));
+      $lista.appendChild(vacio);
+    }else{
+      habitos.forEach(function(h){ $lista.appendChild(pintarHabito(h)); });
+    }
+
+    var hechosHoy = habitos.filter(function(h){ return h.dias.indexOf(HOY) !== -1; }).length;
+    $cifra.textContent = hechosHoy + "/" + habitos.length;
+    $barra.style.width = (habitos.length ? (hechosHoy/habitos.length*100) : 0) + "%";
+
+    var $hist = document.getElementById("historico");
+    var campeon = null;
+    habitos.forEach(function(h){
+      var mejor = record(h.dias);
+      if(mejor > 0 && (!campeon || mejor > campeon.mejor)) campeon = { mejor: mejor, nombre: h.nombre };
+    });
+    if(campeon){
+      $hist.hidden = false;
+      $hist.textContent = "";
+      $hist.appendChild(nodo("span","etq","Mejor racha histórica"));
+      $hist.appendChild(nodo("span","val", campeon.mejor + (campeon.mejor === 1 ? " día" : " días")));
+      $hist.appendChild(nodo("span","quien", campeon.nombre));
+    }else{
+      $hist.hidden = true;
+      $hist.textContent = "";
+    }
+
+    $avisoZona.textContent = "";
+    if(habitos.some(function(h){ return h.ejemplo; })){
+      var aviso = nodo("div","aviso");
+      aviso.appendChild(nodo("span",null,"Estos hábitos son de ejemplo, para mostrar cómo se ven las rachas."));
+      var limpiar = nodo("button",null,"Empezar de cero");
+      limpiar.type = "button"; limpiar.dataset.accion = "limpiar";
+      aviso.appendChild(limpiar);
+      $avisoZona.appendChild(aviso);
+    }
+
+    if(enfocado){
+      var previo = document.querySelector('[data-k="' + enfocado + '"]');
+      if(previo) previo.focus();
+    }
+  }
+
+  function buscar(id){
+    for(var i=0;i<habitos.length;i++){ if(habitos[i].id === id) return habitos[i]; }
+    return null;
+  }
+
+  /* --- Eventos --- */
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("[data-accion]") : null;
+    if(!b) return;
+    var accion = b.dataset.accion;
+
+    if(accion === "alternar"){
+      var h = buscar(b.dataset.id);
+      if(!h) return;
+      var pos = h.dias.indexOf(b.dataset.fecha);
+      if(pos === -1) h.dias.push(b.dataset.fecha); else h.dias.splice(pos,1);
+      confirmando = null;
+      guardar(); pintar();
+    }else if(accion === "confirmar"){
+      confirmando = b.dataset.id;
+      pintar();
+      var si = document.querySelector('[data-k="si:' + b.dataset.id + '"]');
+      if(si) si.focus();
+    }else if(accion === "cancelar"){
+      confirmando = null;
+      pintar();
+    }else if(accion === "eliminar"){
+      habitos = habitos.filter(function(h){ return h.id !== b.dataset.id; });
+      confirmando = null;
+      guardar(); pintar();
+      document.getElementById("nuevo").focus();
+    }else if(accion === "limpiar"){
+      habitos = [];
+      confirmando = null;
+      guardar(); pintar();
+      document.getElementById("nuevo").focus();
+    }
+  });
+
+  document.getElementById("forma").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var campo = document.getElementById("nuevo");
+    var nombre = campo.value.trim();
+    if(!nombre) return;
+    habitos.push({
+      id: "h" + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      nombre: nombre,
+      dias: []
+    });
+    campo.value = "";
+    confirmando = null;
+    guardar(); pintar();
+    campo.focus();
+  });
+
+  /* --- Arranque --- */
+  var guardados = cargar();
+  if(guardados){
+    habitos = guardados.filter(function(h){ return h && typeof h.nombre === "string" && Array.isArray(h.dias); });
+  }else{
+    habitos = ejemplos();
+    guardar();
+  }
+  pintar();
+})();
+</script>
